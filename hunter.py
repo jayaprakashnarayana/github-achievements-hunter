@@ -7,7 +7,7 @@ import string
 import shutil
 import subprocess
 
-def run_command(cmd, cwd=None, capture_output=True, text=True):
+def run_command(cmd, cwd=None, capture_output=True, text=True, ignore_errors=False):
     """Utility function to run shell commands safely."""
     try:
         result = subprocess.run(
@@ -21,11 +21,13 @@ def run_command(cmd, cwd=None, capture_output=True, text=True):
         )
         return result.stdout.strip() if capture_output else ""
     except subprocess.CalledProcessError as e:
-        print(f"\n❌ Error executing command: {cmd}")
-        if capture_output:
-            print(f"Stdout: {e.stdout}")
-            print(f"Stderr: {e.stderr}")
+        if not ignore_errors:
+            print(f"\n❌ Error executing command: {cmd}")
+            if capture_output:
+                print(f"Stdout: {e.stdout}")
+                print(f"Stderr: {e.stderr}")
         raise e
+
 
 def print_banner():
     print("=" * 60)
@@ -160,7 +162,7 @@ def main():
             
             # Clean up local tracking branch
             try:
-                run_command(f"git branch -D {branch_name}", cwd=sandbox_path)
+                run_command(f"git branch -D {branch_name}", cwd=sandbox_path, ignore_errors=True)
             except Exception:
                 pass
 
